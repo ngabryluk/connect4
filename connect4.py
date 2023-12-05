@@ -18,7 +18,7 @@ import utils
 DELAY = 0.1  # default time to wait between things, in seconds
 TIMEOUT = 5  # maximum time per move, in seconds
 
-parser = argparse.ArgumentParser(description="Play Gorgons in Python!")
+parser = argparse.ArgumentParser(description="Play Connect Four in Python!")
 parser.add_argument('--player1', metavar='p1', type=str, help="either 'human' (default) or the name of an AI file", default='human')
 parser.add_argument('--player2', metavar='p2', type=str, help="either 'human' (default) or the name of an AI file", default='human')
 parser.add_argument('-r', '--rows', type=int, help="number of rows on the board (default=6)", default=6)
@@ -37,7 +37,6 @@ def main(args):
     
     # Play the game
     play(players, **vars(args))
-
 
 def play(players, rows=6, cols=7, fast=False, verbose=False, **kwargs):
     """Play a game of Connect Four.
@@ -108,17 +107,21 @@ def play(players, rows=6, cols=7, fast=False, verbose=False, **kwargs):
         else: # AI player
             utils.status(gui, f"{player_id} is thinking...")
             if not fast: time.sleep(DELAY)
-            col = players['ai'][current_player].get_computer_move(deepcopy(board), current_player)
-            if verbose: print(f'\t{player_id} selects column {col}')
-            
-            # Validate the move
-            col = col - 1 # convert to 0-indexing
-            if utils.is_valid(board, col):
-                utils.drop(gui, board, current_player, col)
-                current_player = 1 - current_player # switch turns
-            else: # the player must forfeit for illegal moves
-                utils.status(gui, f"{player_id} made an illegal move. You forfeit!")
-                break
+            try:
+                col = players['ai'][current_player].get_computer_move(deepcopy(board), current_player)
+                if verbose: print(f'\t{player_id} selects column {col}')
+                
+                # Validate the move
+                col = col - 1 # convert to 0-indexing
+                if utils.is_valid(board, col):
+                    utils.drop(gui, board, current_player, col)
+                    current_player = 1 - current_player # switch turns
+                else: # the player must forfeit for illegal moves
+                    utils.status(gui, f"{player_id} made an illegal move. You forfeit!")
+                    break
+            except:
+                pdb.set_trace()
+                current_player = 1 - current_player # you lost your turn!
 
         # Check if game is over yet
         gameover, winner = utils.is_gameover(board)
