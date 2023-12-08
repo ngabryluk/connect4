@@ -30,19 +30,20 @@ def get_computer_move(board, which_player):
 def minimax(board, which_player, ai, depth, alpha=-math.inf, beta=math.inf):
     """Apply minimax with alpha-beta pruning to a node in the tree for the given player."""
 
+    print(board) # Current board state
+    print(depth)
+
     # Check if we have reached a terminal node
     is_gameover, winner = utils.is_gameover(board)
-    if is_gameover and winner == ai:
-        return _, 100
+    if is_gameover and winner == ai: # If Rayah wins with this move
+        print("There is a winning move! Let's Goooooo!")
+        return None, 100 # Pick it!
+    elif is_gameover and winner > 0 and winner != ai: # If opponent wins with next move
+        return None, -100 # Don't pick it!
     
     # If we have reached the max depth, calculate the utility of the board
-    # if depth = 0:
-    #     return _, calculate_utility
-    # We need to come up with a heuristic to calculate the utility
-    # Possible things to look for in the board
-    #   - Opponent 3-in-a-rows (high priority)
-    #   - Number of 3-in-a-rows
-    #   - Number of 2-in-a-rows
+    if depth == 0:
+        return None, 0#calculate_utility(board, ai)
 
     valid_moves = utils.get_valid_moves(board)
     
@@ -60,7 +61,9 @@ def minimax(board, which_player, ai, depth, alpha=-math.inf, beta=math.inf):
             row = rows[move]
             board[row][move] = which_player + 1
 
-            _, utility = minimax(board, ai - 1, ai, alpha, beta)
+            _, utility = minimax(board, 1 - which_player, ai, depth-1,alpha, beta)
+
+            print(utility)
 
             # Bring the board back to original state
             board[row][move] = 0
@@ -85,7 +88,7 @@ def minimax(board, which_player, ai, depth, alpha=-math.inf, beta=math.inf):
             row = rows[move]
             board[row][move] = which_player + 1
 
-            _, utility = minimax(board, ai + 1, ai, alpha, beta)
+            _, utility = minimax(board, 1 - which_player, ai, depth-1, alpha, beta)
 
             # Bring the board back to original state
             board[row][move] = 0
@@ -96,3 +99,71 @@ def minimax(board, which_player, ai, depth, alpha=-math.inf, beta=math.inf):
 
         return best_move, value
 
+def calculate_utility(board, which_player):
+    rows, cols = board.shape
+    scores = []
+    max_score = 0
+    # Check vertically
+    for row in range(rows):
+        score = 0
+        for col in range(cols):
+            if board[row][col] == which_player:
+                score += 1
+                if board[row + 1][col] is not None and board[row + 1][col] == which_player:
+                    score += 1
+                    if board[row + 2][col] is not None and board[row + 2][col] == which_player and board[row][col] == 0:
+                        score += 1
+        if score > max_score:
+            max_score = score
+
+    scores.append(max_score)
+
+    max_score = 0
+
+    for row in range(rows):
+        score = 0
+        for col in range(cols):
+            if board[row][col] == which_player:
+                score += 1
+                if board[row][col + 1] is not None and board[row][col + 1] == which_player:
+                    score += 1
+                    if board[row][col + 2] is not None and board[row][col + 2] == which_player and board[row][col] == 0:
+                        score += 1
+        if score > max_score:
+            max_score = score
+
+    scores.append(max_score)
+
+    max_score = 0
+
+    for row in range(rows):
+        score = 0
+        for col in range(cols):
+            if board[row][col] == which_player:
+                score += 1
+                if board[row + 1][col + 1] is not None and board[row + 1][col + 1] == which_player:
+                    score += 1
+                    if board[row + 2][col + 2] is not None and board[row + 2][col + 2] == which_player:
+                        score += 1
+        if score > max_score:
+            max_score = score
+
+    scores.append(max_score)
+
+    max_score = 0
+
+    for row in range(3, rows):
+        score = 0
+        for col in range(cols):
+            if board[row][col] is not None and board[row][col] == which_player:
+                score += 1
+                if board[row - 1][col + 1] is not None and board[row][col] == which_player:
+                    score += 1
+                    if board[row - 2][col + 2] is not None and board[row - 2][col + 2] == which_player:
+                        score += 1
+        if score > max_score:
+            max_score = score
+            
+    scores.append(max_score)
+
+    return max(scores)
