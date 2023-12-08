@@ -22,28 +22,23 @@ def get_computer_move(board, which_player):
         The column (using 1-indexing!) that the player wants to drop a disc into. 
     """
 
-    ai_player_num = which_player
-    move, _ = minimax(board, ai_player_num, ai_player_num, 10)
+    move, _ = minimax(board, which_player, which_player, 7)
     return move + 1
 
 
 def minimax(board, which_player, ai, depth, alpha=-math.inf, beta=math.inf):
     """Apply minimax with alpha-beta pruning to a node in the tree for the given player."""
 
-    print(board) # Current board state
-    print(depth)
-
     # Check if we have reached a terminal node
     is_gameover, winner = utils.is_gameover(board)
     if is_gameover and winner == ai: # If Rayah wins with this move
-        print("There is a winning move! Let's Goooooo!")
-        return None, 100 # Pick it!
+        return None, math.inf # Pick it!
     elif is_gameover and winner > 0 and winner != ai: # If opponent wins with next move
         return None, -100 # Don't pick it!
     
     # If we have reached the max depth, calculate the utility of the board
     if depth == 0:
-        return None, 0#calculate_utility(board, ai)
+        return None, calculate_utility(board, ai)
 
     valid_moves = utils.get_valid_moves(board)
     
@@ -61,9 +56,7 @@ def minimax(board, which_player, ai, depth, alpha=-math.inf, beta=math.inf):
             row = rows[move]
             board[row][move] = which_player + 1
 
-            _, utility = minimax(board, 1 - which_player, ai, depth-1,alpha, beta)
-
-            print(utility)
+            _, utility = minimax(board, 1 - which_player, ai, depth-1, alpha, beta)
 
             # Bring the board back to original state
             board[row][move] = 0
@@ -109,9 +102,9 @@ def calculate_utility(board, which_player):
         for col in range(cols):
             if board[row][col] == which_player:
                 score += 1
-                if board[row + 1][col] is not None and board[row + 1][col] == which_player:
+                if row + 1 < rows and board[row + 1][col] is not None and board[row + 1][col] == which_player:
                     score += 1
-                    if board[row + 2][col] is not None and board[row + 2][col] == which_player and board[row][col] == 0:
+                    if row + 2 < rows and board[row + 2][col] is not None and board[row + 2][col] == which_player and board[row][col] == 0:
                         score += 1
         if score > max_score:
             max_score = score
@@ -125,9 +118,9 @@ def calculate_utility(board, which_player):
         for col in range(cols):
             if board[row][col] == which_player:
                 score += 1
-                if board[row][col + 1] is not None and board[row][col + 1] == which_player:
+                if col + 1 < cols and board[row][col + 1] is not None and board[row][col + 1] == which_player:
                     score += 1
-                    if board[row][col + 2] is not None and board[row][col + 2] == which_player and board[row][col] == 0:
+                    if col + 2 < cols and board[row][col + 2] is not None and board[row][col + 2] == which_player and board[row][col] == 0:
                         score += 1
         if score > max_score:
             max_score = score
@@ -141,9 +134,9 @@ def calculate_utility(board, which_player):
         for col in range(cols):
             if board[row][col] == which_player:
                 score += 1
-                if board[row + 1][col + 1] is not None and board[row + 1][col + 1] == which_player:
+                if row + 1 < rows and col + 1 < cols and board[row + 1][col + 1] is not None and board[row + 1][col + 1] == which_player:
                     score += 1
-                    if board[row + 2][col + 2] is not None and board[row + 2][col + 2] == which_player:
+                    if row + 2 < rows and col + 2 < cols and board[row + 2][col + 2] is not None and board[row + 2][col + 2] == which_player:
                         score += 1
         if score > max_score:
             max_score = score
@@ -157,9 +150,9 @@ def calculate_utility(board, which_player):
         for col in range(cols):
             if board[row][col] is not None and board[row][col] == which_player:
                 score += 1
-                if board[row - 1][col + 1] is not None and board[row][col] == which_player:
+                if row - 1 >= 0 and col + 1 < cols and board[row - 1][col + 1] is not None and board[row][col] == which_player:
                     score += 1
-                    if board[row - 2][col + 2] is not None and board[row - 2][col + 2] == which_player:
+                    if row - 2 >= 0 and col + 2 < cols and board[row - 2][col + 2] is not None and board[row - 2][col + 2] == which_player:
                         score += 1
         if score > max_score:
             max_score = score
